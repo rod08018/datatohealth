@@ -222,7 +222,7 @@ def clean_table_data(table, key):
                              ]
                              ]
         table['weight'] = table['weight'] * 2.20462
-        table['fat_free_mass'] = table['fat_free_mass '] * 2.20462
+        table['fat_free_mass'] = table['fat_free_mass'] * 2.20462
         return table[
             weight_table_list
         ]
