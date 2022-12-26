@@ -1,14 +1,13 @@
 from dotenv import load_dotenv
-import os
 import pandas as pd
 from sqlalchemy import create_engine
+import os
+import psycopg2
 load_dotenv()
-
+DATABASE_URL = os.environ['DATABASE_URL']
 db_uri = os.getenv("db_uri")
 
-sqlEngine = create_engine(db_uri)
-
-conn = sqlEngine.connect()
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 def manage_db_watch_data(watch_data: dict):
