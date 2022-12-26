@@ -1,3 +1,7 @@
 streamlit
 pandas
 scikit-learn
+matplotlib
+psycopg2
+sqlalchemy
+python-dotenv
