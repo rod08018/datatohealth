@@ -3,17 +3,10 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine
 load_dotenv()
-usr = os.getenv("db_usr")
-pwd = os.getenv("db_pwd")
-hostname = os.getenv("db_hostname")
-db_name = os.getenv("db_name")
-db_driver = os.getenv("db_driver")  # postgresql+psycopg2
+
 db_uri = os.getenv("db_uri")
 
-connection_uri = f'{db_driver}://{usr}:{pwd}@{hostname}/{db_name}'
-
-print(connection_uri)
-sqlEngine = create_engine(connection_uri)
+sqlEngine = create_engine(db_uri)
 
 conn = sqlEngine.connect()
 
