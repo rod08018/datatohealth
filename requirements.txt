@@ -1,7 +1,5 @@
-streamlit
-pandas
-scikit-learn
-matplotlib
-psycopg2
-sqlalchemy
-python-dotenv
+pandas==1.5.2
+plotly==5.11.0
+python-dotenv==0.21.0
+SQLAlchemy==1.4.39
+streamlit==1.15.2
