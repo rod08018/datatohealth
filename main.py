@@ -167,4 +167,4 @@ try:
 
         st.write(general_food_table)
 except:
-    st.markdown("# NO DATA YET!")
+    st.markdown("# NO DATA YET PLEASE UPLOAD USING THE SIDEBAR BROWSE FILES BUTTON! ")
