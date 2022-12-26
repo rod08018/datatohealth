@@ -8,9 +8,10 @@ pwd = os.getenv("db_pwd")
 hostname = os.getenv("db_hostname")
 db_name = os.getenv("db_name")
 db_driver = os.getenv("db_driver")  # postgresql+psycopg2
-
+db_uri = os.getenv("db_uri")
 
 connection_uri = f'{db_driver}://{usr}:{pwd}@{hostname}/{db_name}'
+
 print(connection_uri)
 sqlEngine = create_engine(connection_uri)
 
