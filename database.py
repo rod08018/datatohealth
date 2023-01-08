@@ -5,7 +5,15 @@ import os
 import psycopg2
 load_dotenv()
 DATABASE_URL = os.environ['DATABASE_URL'].replace("postgres://", "postgresql://", 1)
+"""usr = os.getenv("db_usr")
+pwd = os.getenv("db_pwd")
+hostname = os.getenv("db_hostname")
+db_name = os.getenv("db_name")
+db_driver = os.getenv("db_driver")  # postgresql+psycopg2
 db_uri = os.getenv("db_uri")
+
+DATABASE_URL = f'{db_driver}://{usr}:{pwd}@{hostname}/{db_name}'"""
+
 
 sqlEngine = create_engine(DATABASE_URL)
 

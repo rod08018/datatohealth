@@ -1,4 +1,7 @@
 import pandas as pd
+import warnings
+
+warnings.filterwarnings('ignore')
 
 
 def clean_table_data(table, key):
@@ -7,6 +10,7 @@ def clean_table_data(table, key):
         'update_time',
         'start_time',
         'end_time',
+        'day_time',
         'Time of Measurement',
         'original_wake_up_time',
         'original_bed_time'
@@ -16,21 +20,28 @@ def clean_table_data(table, key):
         for column in table.columns:
             if field in column:
                 table[column] = pd.to_datetime(table[column])
+                if 'date' not in table.columns:
+                    table['date'] = table[column].dt.date
     if 'activity_day_summary' in key:
-        table['day_time'] = pd.to_datetime(table['day_time'])
-        table['walk_time'] = table['walk_time'] / 60000
-        table['longest_idle_time'] = table['longest_idle_time'] / 60000
-        table['run_time'] = table['run_time'] / 60000
+        table.drop(['day_time'], axis=1, inplace=True)
+        table['walk_time'] = (table['walk_time'] / 60000).round(2)
+        table['longest_idle_time'] = (table['longest_idle_time'] / 60000).round(2)
+        table['run_time'] = (table['run_time'] / 60000).round(2)
+        print(table.columns)
+        table = table.groupby([table['date']]).mean().round(2)
+
         return table
     elif 'calories_burned_details' in key:
         table['calories_burned.update_time'] = pd.to_datetime(table['calories_burned.update_time'])
-        calories_table_list = [column for column in table.columns if column not in ['version']]
+        calories_table_list = [column for column in table.columns if column not in ['version', 'active_calories_goal']]
         return table[
             calories_table_list
         ]
     elif 'exercise' in key:
         exercise_table_list = [column for column in table.columns if column not in
                                [
+                                   'exercise.update_time',
+                                   'exercise.mean_caloricburn_rate',
                                    'live_data_internal',
                                    'sensing_status',
                                    'exercise.additional',
@@ -223,6 +234,57 @@ def clean_table_data(table, key):
                              ]
         table['weight'] = table['weight'] * 2.20462
         table['fat_free_mass'] = table['fat_free_mass'] * 2.20462
+        table = table[table['height'] != 0]
         return table[
             weight_table_list
         ]
+
+
+def merge_all_data(tables_dict: dict):
+    # food merger
+    food_info_table = tables_dict['food_info']
+    food_info_table = food_info_table.drop(['calorie'], axis=1)
+    food_intake_table = tables_dict['food_intake']
+    general_food_table = food_info_table.merge(right=food_intake_table, on=['name'], how='right')
+
+    general_food_table = general_food_table.drop(
+        columns=['metric_serving_unit', 'serving_description', 'name', 'description'],
+        axis=1,
+    )
+
+    general_food_table['start_time'] = pd.to_datetime(general_food_table['start_time'])
+
+    general_food_table = general_food_table.resample('W-MON', on='start_time').mean().reset_index()
+
+    general_food_table.sort_values(by=['start_time'], ascending=False, inplace=True)
+    tables_dict['general_food_table'] = general_food_table
+    del tables_dict['food_info']
+    del tables_dict['food_intake']
+    del tables_dict['preferences']
+    del tables_dict['stress_histogram']
+    tables_dict = tables_dict.copy()
+    tables_dict['daily_report'] = tables_dict[list(tables_dict.keys())[0]]
+    print('1', list(tables_dict.keys())[0])
+
+    for table in [
+
+        'weight',
+        'tracker_pedometer_step_count',
+        'tracker_heart_rate',
+        'tracker_oxygen_saturation',
+        'sleep',
+        'exercise'
+    ]:
+        if not table == list(tables_dict.keys())[0]:
+
+            column_list = [column for column in tables_dict[table].columns if 'time' not in column]
+
+            to_be_merged = pd.DataFrame(tables_dict[table].groupby('date').mean().round(2))
+
+            tables_dict['daily_report'] = tables_dict['daily_report'].merge(
+                right=to_be_merged,
+                on=['date'],
+                how='left'
+            )
+            tables_dict['daily_report'].fillna(0, inplace=True)
+    return tables_dict
